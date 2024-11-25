@@ -64,6 +64,7 @@ const TasksList: React.FC<TasksListProps> = ({ todos, setTodos }) => {
           <li className="flex items-center justify-between py-2" key={id}>
             <div className="flex items-center">
               <input
+                className="mr-2"
                 type="checkbox"
                 checked={completed}
                 onChange={() => handleCheckbox(id)}
