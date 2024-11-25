@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 interface Todo {
   id: number;
@@ -14,28 +14,29 @@ interface TasksListProps {
 const TasksList: React.FC<TasksListProps> = ({ todos, setTodos }) => {
   const [editableTaskId, setEditableTaskId] = useState<number | null>(null);
   const [editedTaskText, setEditedTaskText] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const handleCheckbox = (id: number) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
 
-
-  const handleCheckbox = (id: number) =>{
-    const updatedTodos = todos.map(todo =>
-      todo.id === id ? {...todo, completed: !todo.completed} : todo
-      );
-    
-      setTodos(updatedTodos);
-  };
-
-  const handleDelete = (id: number) => {
-    const updatedTodos = todos.filter(todo => todo.id !== id); // updates the todo list to not include whichever the id of the task to be deleted
     setTodos(updatedTodos);
   };
 
-  const handleEdit = (id : number, text: string) => {
+  const handleDelete = (id: number) => {
+    const updatedTodos = todos.filter((todo) => todo.id !== id); // updates the todo list to not include whichever the id of the task to be deleted
+    setTodos(updatedTodos);
+  };
+
+  const handleEdit = (id: number, text: string) => {
     setEditableTaskId(id);
     setEditedTaskText(text); //updates the current task id and text of the state to whatever is being edited
   };
 
-  const handleEditInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setEditedTaskText(event.target.value);
   };
 
@@ -44,42 +45,58 @@ const TasksList: React.FC<TasksListProps> = ({ todos, setTodos }) => {
       alert("Cannot be Empty");
       return;
     }
-  
-    const updatedTodos = todos.map(todo =>
+
+    const updatedTodos = todos.map((todo) =>
       todo.id === id ? { ...todo, text: editedTaskText } : todo
     );
-  
+
     setTodos(updatedTodos);
     setEditableTaskId(null);
-
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
   };
 
-
- 
   return (
     <>
       <ul>
-        {todos.map(({id, text, completed}) => (
+        {todos.map(({ id, text, completed }) => (
           <li className="flex items-center justify-between py-2" key={id}>
             <div className="flex items-center">
-            <input type="checkbox" checked={completed} onChange={() => handleCheckbox(id)} />
-            {editableTaskId === id ? (
-              <>
-                <input
-                  type="text"
-                  value={editedTaskText}
-                  onChange={handleEditInputChange}
-                  onBlur={() => handleEditSubmit(id)}
-                  autoFocus
-                />
-              </>
-            ) : (
-              <span className="mr-20">{text}</span>
-            )}
+              <input
+                type="checkbox"
+                checked={completed}
+                onChange={() => handleCheckbox(id)}
+              />
+              {editableTaskId === id ? (
+                <>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={editedTaskText}
+                    onChange={handleEditInputChange}
+                    autoFocus
+                  />
+                </>
+              ) : (
+                <span className="mr-20">{text}</span>
+              )}
             </div>
             <div>
-              <button className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-4' onClick={() => handleDelete(id)}>Delete</button>
-              <button className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-4' onClick={() => handleEdit(id, text)}>
+              <button
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-4"
+                onClick={() => handleDelete(id)}
+              >
+                Delete
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-4"
+                onClick={() =>
+                  editableTaskId === id
+                    ? handleEditSubmit(id)
+                    : handleEdit(id, text)
+                }
+              >
                 {editableTaskId === id ? "Submit" : "Edit"}
               </button>
             </div>

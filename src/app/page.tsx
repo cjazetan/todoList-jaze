@@ -26,7 +26,6 @@ const ToDoApp = () => {
                 <AddTodo addTodo = {addTodo} />
                 <DeleteCompletedTodos todos = {todos} setTodos = {setTodos} />
             </div>
-            
             <div className="m-12">
                 <TasksList todos = {todos} setTodos = {setTodos} />
             </div>
