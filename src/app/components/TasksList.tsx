@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import axios from "axios";
 
 interface Todo {
   id: number;
@@ -16,17 +17,31 @@ const TasksList: React.FC<TasksListProps> = ({ todos, setTodos }) => {
   const [editedTaskText, setEditedTaskText] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleCheckbox = (id: number) => {
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    );
+  const handleCheckbox = async (id: number, completed: boolean) => {
+    try {
+      await axios.patch(`http://localhost:5000/todos/${id}`, {
+        completed: !completed,
+      });
 
-    setTodos(updatedTodos);
+      const updatedTodos = todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      );
+
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    const updatedTodos = todos.filter((todo) => todo.id !== id); // updates the todo list to not include whichever the id of the task to be deleted
-    setTodos(updatedTodos);
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:5000/todos/${id}`); //deletes selected task from backend
+
+      const updatedTodos = todos.filter((todo) => todo.id !== id); // updates the todo list to not include whichever the id of the task to be deleted
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error("Failed to delete selected task.", error);
+    }
   };
 
   const handleEdit = (id: number, text: string) => {
@@ -40,20 +55,28 @@ const TasksList: React.FC<TasksListProps> = ({ todos, setTodos }) => {
     setEditedTaskText(event.target.value);
   };
 
-  const handleEditSubmit = (id: number) => {
+  const handleEditSubmit = async (id: number) => {
     if (!editedTaskText.trim()) {
       alert("Cannot be Empty");
       return;
     }
 
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, text: editedTaskText } : todo
-    );
+    try {
+      await axios.patch(`http://localhost:5000/todos/${id}`, {
+        text: editedTaskText,
+      });
 
-    setTodos(updatedTodos);
-    setEditableTaskId(null);
-    if (inputRef.current) {
-      inputRef.current.blur();
+      const updatedTodos = todos.map((todo) =>
+        todo.id === id ? { ...todo, text: editedTaskText } : todo
+      );
+
+      setTodos(updatedTodos);
+      setEditableTaskId(null);
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
+    } catch (error) {
+      console.error("Failed to Edit task", error);
     }
   };
 
@@ -67,7 +90,7 @@ const TasksList: React.FC<TasksListProps> = ({ todos, setTodos }) => {
                 className="mr-2"
                 type="checkbox"
                 checked={completed}
-                onChange={() => handleCheckbox(id)}
+                onChange={() => handleCheckbox(id, completed)}
               />
               {editableTaskId === id ? (
                 <>

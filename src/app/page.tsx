@@ -28,7 +28,6 @@ const ToDoApp = () => {
       .then((response) => setTodos([...todos, response.data]))
       .catch((error) => console.error("Failed to add Todo:", error));
   };
-  //finished fetch and add todo. edit and delete to be continued.
 
   return (
     <>
